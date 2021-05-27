@@ -1,0 +1,355 @@
+% -*- coding: utf-8 -*-
+\documentclass{article}
+
+\usepackage{listings}
+\usepackage{ctex}
+\usepackage{graphicx}
+\usepackage[a4paper, body={18cm,22cm}]{geometry}
+\usepackage{amsmath,amssymb,amstext,wasysym,enumerate,graphicx}
+\usepackage{float,abstract,booktabs,indentfirst,amsmath}
+\usepackage{array}
+\usepackage{booktabs} %调整表格线与上下内容的间隔
+\usepackage{multirow}
+\usepackage{diagbox}
+\usepackage[colorlinks,linkcolor=blue,urlcolor=black,anchorcolor=blue,citecolor=blue,]{hyperref}%超链接包
+\renewcommand\arraystretch{1.4}
+\usepackage{indentfirst}
+\setlength{\parindent}{2em}
+
+\geometry{left=2.8cm,right=2.2cm,top=2.5cm,bottom=2.5cm}
+%\geometry{left=3.18cm,right=3.18cm,top=2.54cm,bottom=2.54cm}
+
+\graphicspath{{figures/}}
+
+\title{\heiti 实验一：TTR文本词汇丰富度分析 }
+
+\begin{document}
+
+	\maketitle
+	
+	\vspace{5cm}
+	
+	\begin{table}[h]
+		\centering
+		\begin{Large}
+			\begin{tabular}{p{3cm} p{7cm}<{\centering}}
+				学  \qquad  校: &  华中农业大学     \\ \cline{2-2}
+				学院班级:      & 信息学院生信1801班   \\ \cline{2-2}
+				姓  \qquad  名: & 邓启东 \\ \cline{2-2}
+				学  \qquad  号: & 2018317220103 \\ \cline{2-2}
+				指导教师:       &夏静波 \\ \cline{2-2}
+			\end{tabular}
+		\end{Large}		
+	\end{table}
+	
+	\newpage%一个新的页面
+
+	\tableofcontents
+	
+	\newpage
+\section{实验目的}
+\subsection{TTR反映文本复杂程度}
+类符与形符之比（type token ratio，简称 TTR）即一个文本中所有的类符（type）与所有的形符（token）的比值，其中形符指一个文本中所有的词数，类符指不重复计算的形符数，意思是在一个文本中，重复出现的形符只能算作一个类符。
+
+通过计算文本的 TTR 值来判断一个文本的复杂程度，如果一篇文章用了很多不同的单词来写作，那么 TTR 的值就会接近于 1，说明这篇文章的用词比较复杂，词汇丰富度较高，阅读难度较大，反之，词汇丰富度越低，阅读难度越小。
+\section{实验材料}
+任一需要处理的文本或者语料库。本次实验的材料为GENIA语料库和AGAC语料库。
+\subsection{语料库介绍}
+	\subsubsection{GENIA语料库}
+  GENIA语料库是一个生物医学文献集合。这个语料库是为了发展和评估分子生物学信息检索及文本挖掘系统而创建的。GENIA corpus version 3.0.包含2000篇来自MEDLINE数据库的摘要。这些摘要是由PubMed按照human、blood cells以及transcription factors三个医学主题词（medical subject heading terms ）为搜索条件搜索到的。这个语料库已经被按照不同级别的语言信息、语义信息进行标注。
+
+其包含：
+
+1. 词性标注2.短语结构句法注释4.事件注释5.关系注释6.指代消解注释(跨句结构里面，代词到底指的是什么)
+\href{http://www.nactem.ac.uk/GENIA/current/GENIA-corpus/Part-of-speech/GENIAcorpus3.02p.tgz}{\underline{(GENIA下载链接)}}
+	\subsubsection{AGAC语料库}
+AGAC（Annotation of Genes with Alteration-Centric function changes）是一个活性基因人类专家注释语料库，目的是捕捉突变基因在致病环境中的功能变化。可以用于药物再利用的案例研究，揭示了变异与广泛的人类疾病之间的潜在关联。AGAC注释了11种命名实体类型。通过识别出LOF/GOF分类的基因-疾病关联，结合LOF-激动剂/ GOF-拮抗剂假说可以应用于疾病候选和物质的知识片段的发现。
+\href{http://pubannotation.org/collections/AGAC}{\underline{(AGAC下载链接)}}
+
+\section{实验步骤}
+	\subsection{全语料库TTR（类符/形符比的计算）计算}
+我们首先想要分别统计两个文章所有语料的整体类符与形符之比。
+
+GENIA文本语料库文本由GENIAcorpus3.02.xml直接复制得到，并通过代码删去空行。GENIA语料库由2000篇文献，每一篇文献占据三行，分别为MEDLINE文章ID、文章标题、以及摘要正文。我们将第三行摘要正文提取并以列表存储（方便后续实验抽样），整合为一个大的文本文件(见附件 TTR.py)，并上传至服务器使用linux命令行进行整个语料库的TTR计算(见附件 linux命令行.txt)。
+
+AGAC采取同样的方法(代码见附件 AGAC\_process.py)，处理数据过程中发现，AGAC文章大多以两行式存储：第一行标题,第二行摘要。但有43篇例外，并列举出其文件名称、是第几篇文献、以及其实际行数(见附件 AGAC非两行式文章.xlsx)。
+
+其最终TTR计算结果如下表\ref{TTRresult}所示。
+
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|c|c|}
+\hline
+\multicolumn{4}{|c|}{TTR结果}        \\ \hline
+预料库   & 分子     & 分母      & TTR     \\ \hline
+GENIA & 13,648 & 434,141 & 3.14\%  \\ \hline
+AGAC  & 7,132  & 55,414  & 12.87\% \\ \hline
+\end{tabular}
+\caption{两语料库TTR计算结果}
+\label{TTRresult}
+\end{table}
+
+
+我们发现，原文件GENIA\_abstract.txt的总单词数目为402,694，而GENIA\_abstract.pure.txt的总单词数目为434,141。转化成pure后单词总数多了三万。分析原因是由于在转换成单个单词的时候，将连字符（hyphen）变成回车符导致复合词语被拆成了多个词语。
+
+由于分子是基于拆分后的GENIA\_abstract.pure.txt文件统计得出，因此分母应取434,141。分子为13,648。结果为3.1438\% ，同理AGAC的TTR值为12.87\%。
+
+由计算出的TTR可以发现，AGAC的结果TTR较大。是否就意味着AGAC语料库的文本词汇丰富度大，阅读难度大呢？
+
+实际上不是。只有在篇幅相同或者相近的时候，TTR越高才能意味着用词越丰富。但当篇幅差异较大的时候，比如GENIA的语料库大小远大于AGAC，近十倍的情况下,不可直接对比TTR,这是因为词汇储备量及丰富度主要体现在实义词上,但随着篇幅增加,写作中不可避免的功能词(如the, a, of, and等)会不断重复,这会稀释GENIA语料库整体的TTR。
+
+因此,篇幅不一时要对TTR进行标准化,计算每百词(根据长度可调整为每干词、每万词)的平均TTR,即STTR（标准化类符/形符比）的计算方式。
+
+	\subsection{语料库每1000词STTR（标准化类符/形符比的计算）计算}
+\subsubsection{STTR的计算方式}
+
+标准化类符/形符比的计算方法是,计算每个文本每1000词的类符/形符比,将得到的若干个类符/形符比进行均值处理.（如某文本长5000字,其中第一个1000词的类符/形符比为50\%,第二个1000词的类符/形符比为52\%,第三个1000词的类符/形符比为54\%,那就把这三个数字平均下得到52\%）。因此我们需要对两个语料库已经分词的pure文件的单词进行随机抽样。
+\subsubsection{两个预料库STTR结果}
+经过反复的比较，我们发现在抽样次数达到10000次，计算每1000个单词的STTR的时候(代码见附件 STTR.py)，两个语料库结果均稳定在近52\%(表\ref{tab})这和之前的TTR结果大为不同。首先，由于是计算每1000个单词的TTR，数目较小，很多单词的重复率不高，整体的STTR都较大。并且，在选取的词数相同，即标准化以后，可以看出两个语料库的标准化类符/形符比大致相同，可以说明两语料库的词汇丰富度是相近的。\\
+\\
+\\
+\\
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+语料库   & STTR     \\ \hline
+GENIA & 51.9494％ \\ \hline
+AGAC  & 51.9634％ \\ \hline
+\end{tabular}
+\caption{抽样得到的语料库的每千词SSTR}
+\label{tab}
+\end{table}
+\\
+
+\section{实验总结}
+\subsubsection{TTR的局限性以及标准化后的STTR}
+我们从本次实验可以看出，使用TTR和STTR得出了两个完全不同的结论：TTR计算出的GENIA和AGAC两个预料库的词汇丰富度相差4倍。显示两个语料库的差异极大。但是经过分析后我们考虑了语料库的大小因素，引入了改良版本的STTR这个评价指标。最终多次随机抽样取得的平均STTR结果十分相似。得出了完全相反的结论。可以看到评价指标在这个当中的重要性，因此一个实验我们要考虑到实验的合理性，其他因素有没有排除，才能保证我们的结论是正确的。
+\subsubsection{其他方法}
+L2SCA是宾夕法尼亚州立大学的Lu教授于2010年基于Python语言下开发的句法复杂度分析器,涵盖了14种句法复杂度指标,可供句法研究者及教师使用.但是基于其需要在Python语言编辑器中使用,因此本文的目的是说明其使用方法,以供更多研究者研究使用。
+\subsubsection{实验后的一些联想}
+实际上标准化的思想在RNA-Seq基因差异表达分析、词向量嵌入中都有所体现。在学习当中举一反三，我们可以提升自己独立思考的能力。
+\end{document}
+
+
+\section{组员汇报的一些想法}
+主题分析等方法和手段 支付宝 阿里云 马云主题
+百度主题 李彦宏 
+微软 windows操作系统
+要做一个词干提取 stemming regulation regulated regulate 只是提取词干 数据清洗 还可以引入判断文章复杂性的标准
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%Library%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% 1. 脚注用法
+	LaTeX\footnote{Latex is Latex} is a good software
+
+%2. 强调
+	\emph{center of percussion} %[Brody 1986], %\lipsum[5]
+
+%3. 随便生成一段话
+	\lipsum[4]
+
+%4. 列条目
+	\begin{itemize}
+	\item the angular velocity of the bat,
+	\item the velocity of the ball, and
+	\item the position of impact along the bat.
+	\end{itemize}
+
+%5. 表格用法
+	\begin{table}[h]
+	\centering  
+	\begin{tabular}{c|cc}
+		\hline
+		年份 & \multicolumn{2}{c}{指标}\\
+		\hline
+		2017 & 0.9997 & 0.0555 \\
+		2018 & 0.9994 & 0      \\
+		2019 & 0.9993 & 0      \\
+		\hline
+	\end{tabular}
+	\caption{NAME}\label{SIGN}
+	\end{table}
+
+	\begin{center}
+		\begin{tabular}{c|cclcrcc}
+			\hline
+			Year & theta & $S_1^-$ & $S_2^-$ & $S_3^-$ & $S_4^+$ & $S_5^+$ & $S_6^+$ \\%表格标题
+			\hline
+			2016 & 1      & 0      & 0 & 0.0001 & 0      & 0      & 0 \\
+			2017 & 0.9997 & 0.0555 & 0 & 0.2889 & 0.1844 & 0.463  & 0 \\
+			2018 & 0.9994 & 0      & 0 & 0.0012 & 0.3269 & 0.7154 & 0 \\
+			2019 & 0.9993 & 0      & 0 & 0      & 0.4325 & 1.0473 & 0 \\
+			2020 & 0.9991 & 0      & 0 & 0      & 0.5046 & 1.2022 & 0 \\
+			2021 & 0.999  & 0      & 0 & 0      & 0.5466 & 1.2827 & 0 \\
+			2022 & 0.9989 & 0.0017 & 0 & 0.3159 & 0.562  & 1.2995 & 0 \\
+			2023 & 0.9989 & 0      & 0 & 0.0109 & 0.5533 & 1.2616 & 0 \\
+			2024 & 0.9989 & 0      & 0 & 0      & 0.5232 & 1.1769 & 0 \\
+			2025 & 0.9989 & 0      & 0 & 0.1009 & 0.4738 & 1.0521 & 0 \\
+			2026 & 0.9991 & 0      & 0 & 0      & 0.4071 & 0.8929 & 0 \\
+			2027 & 0.9992 & 0.0004 & 0 & 0.1195 & 0.3248 & 0.7042 & 0 \\
+			2028 & 0.9994 & 0.0164 & 0 & 0.046  & 0.2287 & 0.4902 & 0 \\
+			2029 & 0.9997 & 0      & 0 & 0.0609 & 0.12   & 0.2545 & 0 \\
+			2030 & 1      & 0      & 0 & 0      & 0      & 0      & 0 \\
+			\hline
+		\end{tabular}
+	\end{center}
+
+%6. 数学公式
+	\begin{equation}
+		a^2 = a * a\label{aa}
+	\end{equation}
+	
+	\[
+	\begin{pmatrix}{*{20}c}
+	{a_{11} } & {a_{12} } & {a_{13} }  \\
+	{a_{21} } & {a_{22} } & {a_{23} }  \\
+	{a_{31} } & {a_{32} } & {a_{33} }  \\
+	\end{pmatrix}
+	= \frac{{Opposite}}{{Hypotenuse}}\cos ^{ - 1} \theta \arcsin \theta
+	\]
+	
+	\[
+	p_{j}=\begin{cases} 0,&\text{if $j$ is odd}\\
+	r!\,(-1)^{j/2},&\text{if $j$ is even}
+	\end{cases}
+	\]
+	
+	
+	\[
+	\arcsin \theta  =
+	\mathop{{\int\!\!\!\!\!\int\!\!\!\!\!\int}\mkern-31.2mu
+		\bigodot}\limits_\varphi
+	{\mathop {\lim }\limits_{x \to \infty } \frac{{n!}}{{r!\left( {n - r}
+				\right)!}}} \eqno (1)
+	\]
+
+%7. 双图并行
+	\begin{figure}[h]
+		% 一个2*2图片的排列
+		\begin{minipage}[h]{0.5\linewidth}
+			\centering
+			\includegraphics[width=0.8\textwidth]{./figures/0.jpg}
+			\caption{Figure example 2}
+		\end{minipage}
+		\begin{minipage}[h]{0.5\linewidth}
+			\centering
+			\includegraphics[width=0.8\textwidth]{./figures/0.jpg}
+			\caption{Figure example 3}
+		\end{minipage}
+	\end{figure}
+
+%8. 单张图片部分
+	\begin{figure}[h]
+		%\small
+		\centering
+		\includegraphics[width=12cm]{./figures/mcmthesis-aaa.eps}
+		\caption{Figure example 1} \label{fig:aa}
+	\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{minipage}{0.5\linewidth}
+	\begin{tabular}{|c|c|c|}
+		\hline
+		\multicolumn{2}{|c|}{\multirow{2}{*}{合并}}&测试\\
+		\cline{3-3}
+		\multicolumn{2}{|c|}{}& 0.9997  \\
+		\hline
+		2019 & 0.9993 & 0 \\
+		\hline
+	\end{tabular}
+\end{minipage}
+
+\begin{minipage}{0.5\linewidth}
+	\begin{tabular}{c|ccc}
+		\hline
+		年份 & \multicolumn{3}{c}{指标}\\
+		\hline
+		\multirow{3}{*}{合并}&2017 & 0.9997 & 0.0555 \\
+		&2018 & 0.9994 & 0      \\
+		&2019 & 0.9993 & 0      \\
+		\hline
+	\end{tabular}
+\end{minipage}
+
+
+
+	\begin{table}[h]
+	\centering	
+	\begin{Large}
+		\begin{tabular}{p{4cm} p{8cm} < {\centering}}
+			\hline
+			院\qquad 系: & 信息工程学院 \\
+			\hline
+			团队名称: & PlantBook Team \\
+			\hline
+			分\qquad 组: & 第0组1号 \\
+			\hline
+			日\qquad 期: & 2017年10月28日 \\
+			\hline
+			指导教师: & 吱吱吱\\
+			\hline
+		\end{tabular}
+	\end{Large}
+\end{table}
+
+
+\ctexset{
+	section={
+		format+=\heiti \raggedright,
+		name={,、},
+		number=\chinese{section},
+		beforeskip=1.0ex plus 0.2ex minus .2ex,
+		afterskip=1.0ex plus 0.2ex minus .2ex,
+		aftername=\hspace{0pt}
+	},
+}
+
+	\begin{table}[h]
+	\centering
+	\begin{Large}
+		\begin{tabular}{p{3cm} p{7cm}<{\centering}}
+			院  \qquad  系: & 信息工程学院           \\ \cline{2-2}
+		\end{tabular}
+	\end{Large}		
+\end{table}
+\thispagestyle{empty}
+\newpage
+\thispagestyle{empty}
+\tableofcontents
+\thispagestyle{empty}
+\newpage
+\setcounter{page}{1}
+
+% 9. 代码
+
+\usepackage{listings}
+\usepackage{xcolor}
+\lstset{
+	numbers=left, 
+	numberstyle= \tiny, 
+	keywordstyle= \color{ blue!70},
+	commentstyle= \color{red!50!green!50!blue!50}, 
+	frame=shadowbox, % 阴影效果
+	rulesepcolor= \color{ red!20!green!20!blue!20} ,
+	escapeinside=``, % 英文分号中可写入中文
+	xleftmargin=2em,xrightmargin=2em, aboveskip=1em,
+	basicstyle=\footnotesize,
+	framexleftmargin=2em
+}

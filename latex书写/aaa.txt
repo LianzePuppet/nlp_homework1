@@ -1,0 +1,130 @@
+
+通过计算文本的 TTR 值来判断一个文本的复杂程度，如果一篇文章用了很多不同的单词来写作，那么 TTR 的值就会接近于 1，说明这篇文章的用词比较复杂，词汇丰富度较高，阅读难度较大，反之，词汇丰富度越低，阅读难度越小。
+\section{实验材料}
+之前得到的
+\subsection{词云简介}
+wordcloud，也叫词云图，也叫文字云，是对文本中出现频率较高的“关键词”予以视觉化的展现，词云图过滤掉大量的低频低质的文本信息，使得浏览者只要一眼扫过文本就可领略文本的主旨。
+	\subsubsection{GENIA语料库}
+  GENIA语料库是一个生物医学文献集合。这个语料库是为了发展和评估分子生物学信息检索及文本挖掘系统而创建的。GENIA corpus version 3.0.包含2000篇来自MEDLINE数据库的摘要。这些摘要是由PubMed按照human、blood cells以及transcription factors三个医学主题词（medical subject heading terms ）为搜索条件搜索到的。这个语料库已经被按照不同级别的语言信息、语义信息进行标注。
+
+其包含：
+
+1. 词性标注2.短语结构句法注释4.事件注释5.关系注释6.指代消解注释(跨句结构里面，代词到底指的是什么)
+\href{http://www.nactem.ac.uk/GENIA/current/GENIA-corpus/Part-of-speech/GENIAcorpus3.02p.tgz}{\underline{(GENIA下载链接)}}
+	\subsubsection{AGAC语料库}
+AGAC（Annotation of Genes with Alteration-Centric function changes）是一个活性基因人类专家注释语料库，目的是捕捉突变基因在致病环境中的功能变化。可以用于药物再利用的案例研究，揭示了变异与广泛的人类疾病之间的潜在关联。AGAC注释了11种命名实体类型。通过识别出LOF/GOF分类的基因-疾病关联，结合LOF-激动剂/ GOF-拮抗剂假说可以应用于疾病候选和物质的知识片段的发现。
+\href{http://pubannotation.org/collections/AGAC}{\underline{(AGAC下载链接)}}
+
+\section{实验步骤}
+	\subsection{全语料库TTR（类符/形符比的计算）计算}
+我们首先想要分别统计两个文章所有语料的整体类符与形符之比。
+
+GENIA文本语料库文本由GENIAcorpus3.02.xml直接复制得到，并通过代码删去空行。GENIA语料库由2000篇文献，每一篇文献占据三行，分别为MEDLINE文章ID、文章标题、以及摘要正文。我们将第三行摘要正文提取并以列表存储（方便后续实验抽样），整合为一个大的文本文件(见附件 TTR.py)，并上传至服务器使用linux命令行进行整个语料库的TTR计算(见附件 linux命令行.txt)。
+
+AGAC采取同样的方法(代码见附件 AGAC\_process.py)，处理数据过程中发现，AGAC文章大多以两行式存储：第一行标题,第二行摘要。但有43篇例外，并列举出其文件名称、是第几篇文献、以及其实际行数(见附件 AGAC非两行式文章.xlsx)。
+
+其最终TTR计算结果如下表\ref{TTRresult}所示。
+
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|c|c|}
+\hline
+\multicolumn{4}{|c|}{TTR结果}        \\ \hline
+预料库   & 分子     & 分母      & TTR     \\ \hline
+GENIA & 13,648 & 434,141 & 3.14\%  \\ \hline
+AGAC  & 7,132  & 55,414  & 12.87\% \\ \hline
+\end{tabular}
+\caption{两语料库TTR计算结果}
+\label{TTRresult}
+\end{table}
+
+
+我们发现，原文件GENIA\_abstract.txt的总单词数目为402,694，而GENIA\_abstract.pure.txt的总单词数目为434,141。转化成pure后单词总数多了三万。分析原因是由于在转换成单个单词的时候，将连字符（hyphen）变成回车符导致复合词语被拆成了多个词语。
+
+由于分子是基于拆分后的GENIA\_abstract.pure.txt文件统计得出，因此分母应取434,141。分子为13,648。结果为3.1438\% ，同理AGAC的TTR值为12.87\%。
+
+由计算出的TTR可以发现，AGAC的结果TTR较大。是否就意味着AGAC语料库的文本词汇丰富度大，阅读难度大呢？
+
+实际上不是。只有在篇幅相同或者相近的时候，TTR越高才能意味着用词越丰富。但当篇幅差异较大的时候，比如GENIA的语料库大小远大于AGAC，近十倍的情况下,不可直接对比TTR,这是因为词汇储备量及丰富度主要体现在实义词上,但随着篇幅增加,写作中不可避免的功能词(如the, a, of, and等)会不断重复,这会稀释GENIA语料库整体的TTR。
+
+因此,篇幅不一时要对TTR进行标准化,计算每百词(根据长度可调整为每干词、每万词)的平均TTR,即STTR（标准化类符/形符比）的计算方式。
+
+	\subsection{语料库每1000词STTR（标准化类符/形符比的计算）计算}
+\subsubsection{STTR的计算方式}
+
+标准化类符/形符比的计算方法是,计算每个文本每1000词的类符/形符比,将得到的若干个类符/形符比进行均值处理.（如某文本长5000字,其中第一个1000词的类符/形符比为50\%,第二个1000词的类符/形符比为52\%,第三个1000词的类符/形符比为54\%,那就把这三个数字平均下得到52\%）。因此我们需要对两个语料库已经分词的pure文件的单词进行随机抽样。
+\subsubsection{两个预料库STTR结果}
+经过反复的比较，我们发现在抽样次数达到10000次，计算每1000个单词的STTR的时候(代码见附件 STTR.py)，两个语料库结果均稳定在近52\%(表\ref{tab})这和之前的TTR结果大为不同。首先，由于是计算每1000个单词的TTR，数目较小，很多单词的重复率不高，整体的STTR都较大。并且，在选取的词数相同，即标准化以后，可以看出两个语料库的标准化类符/形符比大致相同，可以说明两语料库的词汇丰富度是相近的。\\
+\\
+\\
+\\
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+语料库   & STTR     \\ \hline
+GENIA & 51.9494％ \\ \hline
+AGAC  & 51.9634％ \\ \hline
+\end{tabular}
+\caption{抽样得到的语料库的每千词SSTR}
+\label{tab}
+\end{table}
+\\
+
+\subsection{词汇频率的统计以及wordcloud词云绘制}
+
+之前的TTR和STTR的计算都是为了观察语料库的复杂程度，也就是词语不重复的程度。为了直观地观察两个语料库重复的词语的程度，我们使用R语言的tm\_map这个文本挖掘包对语料库中出现的词语进行统计。
+\subsubsection{GENIA预料库过大内存不够的问题及解决}
+在统计过程中，由于本地电脑的内存有限，而GENIA太大，电脑再将变量dtm转换成矩阵的时候无法分配大小为36.7 Gb的矢量。因此我们书写代码(见代码 get\_GENIA.py)将GENIA截取前55,414行，和AGAC的行数保持一致(保存为 get\_part\_of\_GENIA.txt文件)。这种方式其实有一个问题就是不是随机抽取行，可能会因为文献顺序问题影响结果，不能反映GENIA全文的词频。不过随机抽行也很简单，这里知识以截取前55,414行作为示例进行分析。
+\subsubsection{词频统计和词云绘制}
+之后过小写转换、去掉数字、去除停用词(the/of/a之类的无实义的词语)、去除标点、空格之后进行词语频率的统计。
+分别得到词频如表\ref{mmm}所示以及词云(见图 \ref{ppp}、\ref{nnn})。\\
+\begin{table}[h]
+\centering
+\begin{tabular}{|c|c|c|c|}
+\hline
+\multicolumn{2}{|c|}{GENIA} & \multicolumn{2}{c|}{AGAC} \\ \hline
+word              & freq    & word           & freq     \\ \hline
+cells             & 673     & mutations      & 373      \\ \hline
+kappa             & 453     & function       & 363      \\ \hline
+cell              & 442     & mutation       & 260      \\ \hline
+expression        & 340     & loss           & 213      \\ \hline
+binding           & 305     & gene           & 209      \\ \hline
+gene              & 298     & cells          & 187      \\ \hline
+alpha             & 298     & expression     & 173      \\ \hline
+protein           & 285     & mutant         & 168      \\ \hline
+activation        & 258     & protein        & 167      \\ \hline
+transcription     & 244     & variants       & 167      \\ \hline
+\end{tabular}
+\caption{两语料库出现频率较高的前十个词汇极其出现次数}
+\label{mmm}
+\end{table}
+
+\begin{figure}[]
+  \centering
+  \includegraphics[scale=0.7]{./picture/GENIA_wordcloud.png} %1.png是图片文件的相对路径
+  \caption{GENIA词云} %caption是图片的标题
+  \label{ppp} %此处的label相当于一个图片的专属标志，目的是方便上下文的引用
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.5]{./picture/AGAC_wordcloud.png} %1.png是图片文件的相对路径
+  \caption{AGAC词云} %caption是图片的标题
+  \label{nnn} %此处的label相当于一个图片的专属标志，目的是方便上下文的引用
+\end{figure}
+
+\subsubsection{词云结果分析}
+我们可以从高频词表和词云图看出，两个语料库的高频词汇有所区别。很明显，GENIA语料库中出现的高频词有"cell"、"gene"、"transcription"、"protein"、"human"等。与它本身的三个医学主题词：human、blood cells以及transcription factors有着密切的关系。而出现频率最高的"cells"这个词也体现其主要为分子生物学水平的特点。
+
+其中出现的高频词与"kappa"经过原始摘要检查发现实际指的是"NF-kappa-B"，即一种核因子蛋白，一个转录因子蛋白家族。在几乎所有的动物细胞中都能发现NF-kB，它们参与细胞对外界刺激的响应，如细胞因子、辐射、重金属、病毒等。在细胞的炎症反应、免疫应答等过程中NF-kB起到关键性作用。NF-kB的错误调节会引发自身免疫病、慢性炎症以及很多癌症。NF-kB也与突触的可塑性、记忆有关。
+
+而AGAC语料库中出现的高频词是"mutations"、"mutations"、"function"、"loss"、"gene"等词语。可以明显看出其是关于突变基因和功能变化的语料库。和我们的预期一致。"loss"、"gof"等词也是后续我们实体识别中需要贴上标签的词汇。
+\section{实验总结}
+\subsubsection{TTR的局限性以及标准化后的STTR}
+我们从本次实验可以看出，使用TTR和STTR得出了两个完全不同的结论：TTR计算出的GENIA和AGAC两个预料库的词汇丰富度相差4倍。显示两个语料库的差异极大。但是经过分析后我们考虑了语料库的大小因素，引入了改良版本的STTR这个评价指标。最终多次随机抽样取得的平均STTR结果十分相似。得出了完全相反的结论。可以看到评价指标在这个当中的重要性，因此一个实验我们要考虑到实验的合理性，其他因素有没有排除，才能保证我们的结论是正确的。
+\subsubsection{其他方法}
+L2SCA是宾夕法尼亚州立大学的Lu教授于2010年基于Python语言下开发的句法复杂度分析器,涵盖了14种句法复杂度指标,可供句法研究者及教师使用.但是基于其需要在Python语言编辑器中使用,因此本文的目的是说明其使用方法,以供更多研究者研究使用。
+\subsubsection{实验后的一些联想}
+实际上标准化的思想在RNA-Seq基因差异表达分析、词向量嵌入中都有所体现。在学习当中举一反三，我们可以提升自己独立思考的能力。
